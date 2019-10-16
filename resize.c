@@ -60,32 +60,26 @@ int main(int argc, char *argv[])
     }
     BITMAPFILEHEADER outFilebf = inFilebf;
     BITMAPINFOHEADER outFilebi = inFilebi;
-    // write outfile's BITMAPFILEHEADER
+  
+    // determine padding for scanlines before resizing
+    int inFilePadding = (4 - (inFilebi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int outFilebi.biWidth = inFilebi.biWidth * n;
+    int outFilebi.biHeight = inFilebi.biHeight * n;
+
+    int outFilePadding = (4 - (outFilebi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    outFilebi.biSizeImage = ((sizeof(RGBTRIPLE) * outFilebi.biWidth) + outFilePadding) * abs(outFilebi.biHeight);
+    outFilebf.bfSize = outFilebi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	  // write outfile's BITMAPFILEHEADER
     fwrite(&outFilebf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
     // write outfile's BITMAPINFOHEADER
     fwrite(&outFilebi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    // determine padding for scanlines before resizing
-    int inFilePadding = (4 - (inFilebi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
-    int inFileBiWidth = inFilebi.biWidth;
-    int inFileBiHeight = abs(inFilebi.biHeight);
-
-    inFilebi.biSizeImage = ((sizeof(RGBTRIPLE) * inFilebi.biWidth) + inFilePadding) * (inFilebi.biHeight);
-    inFilebf.bfSize = inFilebi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    // ______________________AFTER RESIZIG_________________________
-
-    outFilebi.biWidth = inFilebi.biWidth * n;
-    outFilebi.biHeight = inFilebi.biHeight * n;
-
-    int outFilePadding = (4 - (outFilebi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
-    outFilebi.biSizeImage = ((sizeof(RGBTRIPLE) * outFilebi.biWidth) + outFilePadding) * (outFilebi.biHeight);
-    outFilebf.bfSize = outFilebi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-	RGBTRIPLE array[outFilebi.biWidth];
-	int count = 0;
+    RGBTRIPLE array[outFilebi.biWidth];
     // iterate over infile's scanlines
     for (int i = 0; i < abs(inFilebi.biHeight); i++)
     {
+	int count = 0;
        	// iterate over pixels in scanline
        	for (int j = 0; j < inFilebi.biWidth; j++)
        	{
@@ -120,8 +114,6 @@ int main(int argc, char *argv[])
         	    fputc(0x00, outptr);
         	}
 		}
-        count = 0;
-
     }
 
     // close infile

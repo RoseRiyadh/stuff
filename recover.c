@@ -46,10 +46,11 @@ int main(int argc, char *argv[])
             if (pointer != NULL)
             {
                 fclose(pointer);
+                return 0;
             }
             char jpegName[9];
             //To change the name everytime a new JPEG is found..
-            sprintf(jpegName, "%3i.jpeg", ++count);
+            sprintf(jpegName, "%03i.jpeg", count++);
             pointer = fopen(jpegName, "w");
             noJPEGS++;
             fwrite(&chunk, sizeof(chunk), 1, pointer);
